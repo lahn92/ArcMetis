@@ -38,7 +38,6 @@ position_pulses = 0
 last_a_state = encoder_a.value
 
 def encoder_callback():
-    """Simplified encoder callback that monitors only channel A."""
     global position_pulses, last_a_state
     
     current_a = encoder_a.value
