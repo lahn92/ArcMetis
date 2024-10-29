@@ -1,0 +1,10 @@
+# Ignore the .env file
+.env
+ArcMetis.code-workspace
+pyvenv.cfg
+
+# Ignore the virtual environment folder
+.venv/
+
+# Ignore any __pycache__ directories
+__pycache__/

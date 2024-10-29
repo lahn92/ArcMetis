@@ -1,0 +1,17 @@
+Start af python virtual inverioment
+    source ~/pycode/bin/activate
+
+Service comandoer 
+    sudo systemctl status
+    sudo systemctl start
+    sudo systemctl enable
+    sudo systemctl stop
+    sudo systemctl restart
+
+Services der bruges:
+    udp_to_mqtt.service
+    grafana.service
+    grafana-kiosk.service
+
+edit service files
+    sudo nano /etc/systemd/system/udp_to_mqtt.service
