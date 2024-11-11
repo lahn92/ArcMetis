@@ -32,8 +32,8 @@ After=network.target grafana-server.service
 [Service]
 ExecStart=/home/arcmetis/ArcMetis/.venv/bin/python3 /home/ArcMetis/ArcMetis/master.py
 WorkingDirectory=/home/arcmetis/ArcMetis
-Environment=VIRTUAL_ENV=/home/arcmetis/ArcMetis
-Environment=PATH=/home/arcmetis/ArcMetis/bin:$PATH
+Environment=VIRTUAL_ENV=/home/arcmetis/ArcMetis/.venv
+Environment=PATH=/home/arcmetis/ArcMetis/.venv/bin:$PATH
 Restart=always
 User=arcmetis
 Group=arcmetis

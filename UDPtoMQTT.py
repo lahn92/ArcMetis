@@ -47,7 +47,6 @@ def process_data(data, client, mqtt_broker):
             P_diff = abs(float(P_ude) - float(P_inde))
             
             # Publish each value to its own MQTT topic
-            client.publish("topic/tidGaaet", tidGaaet)
             client.publish("topic/P_ude", P_ude)
             client.publish("topic/P_inde", P_inde)
             client.publish("topic/RH", RH)

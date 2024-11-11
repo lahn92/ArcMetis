@@ -173,7 +173,7 @@ def main():
     # Attempt initial connection
     for attempt in range(RECONNECT_ATTEMPTS):
         try:
-            client.connect(mqtt_broker)
+            client.connect(mqtt_broker, keepalive=60)
             print(f"Connected to MQTT broker on attempt {attempt + 1}")
             break
         except Exception as e:
