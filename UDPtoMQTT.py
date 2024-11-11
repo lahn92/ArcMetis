@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt
 import time
 
 # Set up UDP server with socket timeout handling
-def udp_server(host='0.0.0.0', port=61557, buffer_size=1024, mqtt_broker='192.168.1.64'):
+def udp_server(host='0.0.0.0', port=61557, buffer_size=1024, mqtt_broker='127.0.0.1'):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((host, port))
 
