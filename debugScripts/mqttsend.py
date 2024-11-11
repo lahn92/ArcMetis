@@ -2,13 +2,14 @@ import paho.mqtt.client as mqtt
 
 # MQTT Settings
 mqtt_broker = '192.168.150.165'  # Localhost IP as the broker is on the same Raspberry Pi
-mqtt_topic = 'topic/leak'
+mqtt_topic = 'topic/tidGaaet'
 #topic/leak
 #winch/setpoint
+#topic/tidGaaet
 def main():
     # Set up MQTT client
     client = mqtt.Client()
-    client.connect(mqtt_broker)
+    client.connect(mqtt_broker, keepalive=60)
     
     try:
         while True:

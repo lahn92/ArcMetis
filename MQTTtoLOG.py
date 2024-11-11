@@ -22,7 +22,7 @@ data = {
 }
 
 # USB path where CSV will be saved
-usb_path = '/media/usb/data_log.csv'
+usb_path = '/media/arcmetis/ARCMETIS/data_log.csv'
 
 # Callback when a message is received
 def on_message(client, userdata, msg):
