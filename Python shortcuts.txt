@@ -1,15 +1,17 @@
 Start af python virtual inverioment
     source ~/pycode/bin/activate
 
-Service comandoer 
-    sudo systemctl status
-    sudo systemctl start
-    sudo systemctl enable
-    sudo systemctl stop
-    sudo systemctl restart
+Service comandoer
+    sudo systemctl daemon-reload
+    sudo systemctl status "service name"
+    sudo systemctl start "service name"
+    sudo systemctl enable "service name"
+    sudo systemctl disable "service name"
+    sudo systemctl stop "service name"
+    sudo systemctl restart "service name"
 
 Services der bruges:
-    udp_to_mqtt.service
+    arcmetis.service
     grafana.service
     grafana-kiosk.service
 
@@ -18,3 +20,23 @@ edit service files
 
 Network maneger
     sudo nmtui
+
+
+
+copy of arcmetis.service files
+
+[Unit]
+Description=Startup of ARCmetis master script
+After=network.target grafana-server.service
+
+[Service]
+ExecStart=/home/arcmetis/ArcMetis/.venv/bin/python3 /home/ArcMetis/ArcMetis/master.py
+WorkingDirectory=/home/arcmetis/ArcMetis
+Environment=VIRTUAL_ENV=/home/arcmetis/ArcMetis
+Environment=PATH=/home/arcmetis/ArcMetis/bin:$PATH
+Restart=always
+User=arcmetis
+Group=arcmetis
+
+[Install]
+WantedBy=multi-user.target
