@@ -15,3 +15,6 @@ Services der bruges:
 
 edit service files
     sudo nano /etc/systemd/system/udp_to_mqtt.service
+
+Network maneger
+    sudo nmtui

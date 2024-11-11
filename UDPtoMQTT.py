@@ -1,3 +1,5 @@
+#this script takes in data from the probe over the UDP connection and sends it to the mqtt broker. 
+
 import socket
 import paho.mqtt.client as mqtt
 import time
@@ -59,6 +61,7 @@ def process_data(data, client, mqtt_broker):
             client.publish("topic/EC", EC)
             client.publish("topic/Perc_bat", Perc_bat)
             client.publish("topic/P_diff", P_diff)
+            client.publish("topic/tidGaaet", tidGaaet)
 
             print(f"Published first packet values to respective topics.")
         
@@ -69,6 +72,7 @@ def process_data(data, client, mqtt_broker):
             client.publish("topic/tidGaaet", tidGaaet)
             client.publish("topic/P_ude", P_ude)
             client.publish("topic/Perc_bat", Perc_bat)
+            client.publish("topic/tidGaaet", tidGaaet)
             
             print(f"Published second packet values to respective topics.")
         
