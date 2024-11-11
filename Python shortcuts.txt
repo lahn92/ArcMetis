@@ -1,5 +1,6 @@
 Start af python virtual inverioment
-    source ~/pycode/bin/activate
+    source /home/arcmetis/ArcMetis/.venv/bin/activate
+
 
 Service comandoer
     sudo systemctl daemon-reload

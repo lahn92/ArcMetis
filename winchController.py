@@ -25,7 +25,7 @@ DISTANCE_PER_PULSE = 0.2638  # Distance per encoder pulse in cm
 
 # MQTT Settings
 mqtt_broker = '127.0.0.1'
-mqtt_topic = 'winch/setpoint'
+mqtt_topic = 'platform/winchSetPoint'
 RECONNECT_ATTEMPTS = 5      # Max number of reconnect attempts
 
 # Define the pin factory using pigpio

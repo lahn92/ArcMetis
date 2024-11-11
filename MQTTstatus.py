@@ -7,7 +7,7 @@ import time
 BROKER_IP = "127.0.0.1"  # Change this to your broker IP if needed
 STATUS_TOPIC = "topic/status"
 ALERT_TOPICS = [
-    "topic/leak",  # Add more topics as needed to this list. the topics should be 0 for no fault and 1 for fault. they also needs to be added to the grafana server dashboard status panel vis. 
+    "probe/leak",  # Add more topics as needed to this list. the topics should be 0 for no fault and 1 for fault. they also needs to be added to the grafana server dashboard status panel vis. 
 ]
 TOPIC_ALERT_STATUS = {}  # Stores status numbers for each topic
 current_alerts = []

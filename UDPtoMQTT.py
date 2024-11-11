@@ -47,20 +47,20 @@ def process_data(data, client, mqtt_broker):
             P_diff = abs(float(P_ude) - float(P_inde))
             
             # Publish each value to its own MQTT topic
-            client.publish("topic/P_ude", P_ude)
-            client.publish("topic/P_inde", P_inde)
-            client.publish("topic/RH", RH)
-            client.publish("topic/SCD30_temp", SCD30_temp)
-            client.publish("topic/htu_temp", htu_temp)
-            client.publish("topic/T_ude", T_ude)
-            client.publish("topic/CO2", CO2)
-            client.publish("topic/O2", O2)
-            client.publish("topic/CH4", CH4)
-            client.publish("topic/MIPEX", MIPEX)
-            client.publish("topic/EC", EC)
-            client.publish("topic/Perc_bat", Perc_bat)
-            client.publish("topic/P_diff", P_diff)
-            client.publish("topic/tidGaaet", tidGaaet)
+            client.publish("probe/P_ude", P_ude)
+            client.publish("probe/P_inde", P_inde)
+            client.publish("probe/RH", RH)
+            client.publish("probe/SCD30_temp", SCD30_temp)
+            client.publish("probe/htu_temp", htu_temp)
+            client.publish("probe/T_ude", T_ude)
+            client.publish("probe/CO2", CO2)
+            client.publish("probe/O2", O2)
+            client.publish("probe/CH4", CH4)
+            client.publish("probe/MIPEX", MIPEX)
+            client.publish("probe/EC", EC)
+            client.publish("probe/Perc_bat", Perc_bat)
+            client.publish("probe/P_diff", P_diff)
+            client.publish("probe/tidGaaet", tidGaaet)
 
             print(f"Published first packet values to respective topics.")
         
@@ -68,18 +68,18 @@ def process_data(data, client, mqtt_broker):
             tidGaaet, P_ude, Perc_bat = values
             
             # Publish to MQTT
-            client.publish("topic/tidGaaet", tidGaaet)
-            client.publish("topic/P_ude", P_ude)
-            client.publish("topic/Perc_bat", Perc_bat)
-            client.publish("topic/tidGaaet", tidGaaet)
+            client.publish("probe/tidGaaet", tidGaaet)
+            client.publish("probe/P_ude", P_ude)
+            client.publish("probe/Perc_bat", Perc_bat)
+            client.publish("probe/tidGaaet", tidGaaet)
             
             print(f"Published second packet values to respective topics.")
         
         elif 'leak' in data:  # Leak message
             # Convert leak message to boolean
             leak_status = 1 if 'leak' in data else 0
-            client.publish("topic/leak", leak_status)
-            print(f"Published to topic/leak: {leak_status}")
+            client.publish("probe/leak", leak_status)
+            print(f"Published to probe/leak: {leak_status}")
         
         # Disconnect from the MQTT broker
         client.disconnect()

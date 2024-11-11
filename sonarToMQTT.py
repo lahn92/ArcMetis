@@ -50,7 +50,7 @@ try:
             print("Distance: %s\tConfidence: %s%%" % (distance, confidence))
             
             # Publish the depth to the MQTT topic
-            mqtt_client.publish("sonar/depth", distance)
+            mqtt_client.publish("platform/sonarDepth", distance)
         else:
             print("Failed to get distance data")
         

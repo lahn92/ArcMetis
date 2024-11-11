@@ -30,37 +30,37 @@ def on_message(client, userdata, msg):
     payload = msg.payload.decode()
 
     # Check which topic has been updated and update the corresponding value
-    if topic == "topic/tidGaaet":
+    if topic == "probe/tidGaaet":
         data["tidGaaet"] = payload
-    elif topic == "topic/P_ude":
+    elif topic == "probe/P_ude":
         data["P_ude"] = payload
-    elif topic == "topic/P_inde":
+    elif topic == "probe/P_inde":
         data["P_inde"] = payload
-    elif topic == "topic/RH":
+    elif topic == "probe/RH":
         data["RH"] = payload
-    elif topic == "topic/SCD30_temp":
+    elif topic == "probe/SCD30_temp":
         data["SCD30_temp"] = payload
-    elif topic == "topic/htu_temp":
+    elif topic == "probe/htu_temp":
         data["htu_temp"] = payload
-    elif topic == "topic/T_ude":
+    elif topic == "probe/T_ude":
         data["T_ude"] = payload
-    elif topic == "topic/CO2":
+    elif topic == "probe/CO2":
         data["CO2"] = payload
-    elif topic == "topic/O2":
+    elif topic == "probe/O2":
         data["O2"] = payload
-    elif topic == "topic/CH4":
+    elif topic == "probe/CH4":
         data["CH4"] = payload
-    elif topic == "topic/MIPEX":
+    elif topic == "probe/MIPEX":
         data["MIPEX"] = payload
-    elif topic == "topic/EC":
+    elif topic == "probe/EC":
         data["EC"] = payload
-    elif topic == "topic/Perc_bat":
+    elif topic == "probe/Perc_bat":
         data["Perc_bat"] = payload
-    elif topic == "topic/P_diff":
+    elif topic == "probe/P_diff":
         data["P_diff"] = payload
 
     # If "topic/tidGaaet" is updated, save the data to CSV
-    if topic == "topic/tidGaaet":
+    if topic == "probe/tidGaaet":
         save_to_csv(data)
         reset_data()
 
@@ -100,20 +100,20 @@ client.connect("127.0.0.1", keepalive=60)
 
 # Subscribe to topics
 topics = [
-    "topic/tidGaaet",
-    "topic/P_ude",
-    "topic/P_inde",
-    "topic/RH",
-    "topic/SCD30_temp",
-    "topic/htu_temp",
-    "topic/T_ude",
-    "topic/CO2",
-    "topic/O2",
-    "topic/CH4",
-    "topic/MIPEX",
-    "topic/EC",
-    "topic/Perc_bat",
-    "topic/P_diff"
+    "probe/tidGaaet",
+    "probe/P_ude",
+    "probe/P_inde",
+    "probe/RH",
+    "probe/SCD30_temp",
+    "probe/htu_temp",
+    "probe/T_ude",
+    "probe/CO2",
+    "probe/O2",
+    "probe/CH4",
+    "probe/MIPEX",
+    "probe/EC",
+    "probe/Perc_bat",
+    "probe/P_diff"
 ]
 
 for topic in topics:

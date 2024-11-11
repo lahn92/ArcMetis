@@ -1,30 +1,34 @@
 import paho.mqtt.client as mqtt
 import random
 import time
+import threading
 
 # MQTT Broker address
-BROKER = "127.0.0.1"
+BROKER = "192.168.150.165"
 
 # MQTT Topics
 TOPICS = {
-    "topic/tidGaaet": None,
-    "topic/P_ude": None,
-    "topic/P_inde": None,
-    "topic/RH": None,
-    "topic/SCD30_temp": None,
-    "topic/htu_temp": None,
-    "topic/T_ude": None,
-    "topic/CO2": None,
-    "topic/O2": None,
-    "topic/CH4": None,
-    "topic/MIPEX": None,
-    "topic/EC": None,
-    "topic/Perc_bat": None,
-    "topic/P_diff": None
+    "probe/tidGaaet": None,
+    "probe/P_ude": None,
+    "probe/P_inde": None,
+    "probe/RH": None,
+    "probe/SCD30_temp": None,
+    "probe/htu_temp": None,
+    "probe/T_ude": None,
+    "probe/CO2": None,
+    "probe/O2": None,
+    "probe/CH4": None,
+    "probe/MIPEX": None,
+    "probe/EC": None,
+    "probe/Perc_bat": None,
+    "probe/P_diff": None
 }
 
 # Initialize MQTT client
 client = mqtt.Client()
+
+# Connection flag
+is_connected = False
 
 # User-defined mode
 def select_mode():
@@ -37,27 +41,27 @@ def select_mode():
 # Generate random data for each topic except tidGaaet
 def generate_random_data():
     return {
-        "topic/P_ude": round(random.uniform(1000, 2000), 2),
-        "topic/P_inde": round(random.uniform(1000, 2000), 2),
-        "topic/RH": round(random.uniform(30, 60), 2),
-        "topic/SCD30_temp": round(random.uniform(18, 30), 2),
-        "topic/htu_temp": round(random.uniform(18, 30), 2),
-        "topic/T_ude": round(random.uniform(20, 40), 2),
-        "topic/CO2": round(random.uniform(300, 1000), 2),
-        "topic/O2": round(random.uniform(20, 22), 2),
-        "topic/CH4": round(random.uniform(0, 10), 2),
-        "topic/MIPEX": round(random.uniform(0, 10), 2),
-        "topic/EC": round(random.uniform(0, 1), 2),
-        "topic/Perc_bat": round(random.uniform(0, 100), 2),
-        "topic/P_diff": round(random.uniform(0, 10), 2)
+        "probe/P_ude": round(random.uniform(1000, 2000), 2),
+        "probe/P_inde": round(random.uniform(1000, 2000), 2),
+        "probe/RH": round(random.uniform(30, 60), 2),
+        "probe/SCD30_temp": round(random.uniform(18, 30), 2),
+        "probe/htu_temp": round(random.uniform(18, 30), 2),
+        "probe/T_ude": round(random.uniform(20, 40), 2),
+        "probe/CO2": round(random.uniform(300, 1000), 2),
+        "probe/O2": round(random.uniform(20, 22), 2),
+        "probe/CH4": round(random.uniform(0, 10), 2),
+        "probe/MIPEX": round(random.uniform(0, 10), 2),
+        "probe/EC": round(random.uniform(0, 1), 2),
+        "probe/Perc_bat": round(random.uniform(0, 100), 2),
+        "probe/P_diff": round(random.uniform(0, 10), 2)
     }
 
 # Publish data to MQTT broker
 def publish_data(mode):
     tidGaaet_counter = 0
-    while True:
+    while is_connected:
         # Update tidGaaet with incremented counter
-        TOPICS["topic/tidGaaet"] = tidGaaet_counter
+        TOPICS["probe/tidGaaet"] = tidGaaet_counter
         tidGaaet_counter += 1
         
         # Generate random data for other topics
@@ -70,10 +74,9 @@ def publish_data(mode):
         elif mode == "2":
             # Partial data set (specific topics)
             topics_to_publish = {
-                "topic/tidGaaet": TOPICS["topic/tidGaaet"],
-                "topic/P_ude": random_data["topic/P_ude"],
-                "topic/Perc_bat": random_data["topic/Perc_bat"],
-                "topic/tidGaaet": TOPICS["topic/tidGaaet"]
+                "probe/tidGaaet": TOPICS["probe/tidGaaet"],
+                "probe/P_ude": random_data["probe/P_ude"],
+                "probe/Perc_bat": random_data["probe/Perc_bat"],
             }
         else:
             print("Invalid mode selected. Exiting...")
@@ -85,17 +88,25 @@ def publish_data(mode):
             print(f"Published {topic}: {value}")
 
         # Wait for a second before sending the next set of data
-        time.sleep(1)
+        time.sleep(5)
 
 # Connect to MQTT broker
 def on_connect(client, userdata, flags, rc):
-    print(f"Connected to MQTT broker with result code {rc}")
-    # Start publishing data after connecting
-    mode = select_mode()
-    publish_data(mode)
+    global is_connected
+    if rc == 0:
+        is_connected = True
+        print(f"Connected to MQTT broker with result code {rc}")
+        # Start publishing data after connecting in a separate thread
+        publish_thread = threading.Thread(target=publish_data, args=(mode,))
+        publish_thread.start()
+    else:
+        print(f"Failed to connect with result code {rc}")
 
 # Setup the MQTT client and callbacks
 client.on_connect = on_connect
+
+# Select mode before connecting
+mode = select_mode()
 
 # Connect to the MQTT broker
 client.connect(BROKER, keepalive=60)
@@ -106,7 +117,7 @@ client.loop_start()
 try:
     # Run the script indefinitely
     while True:
-        time.sleep(1)
+        time.sleep(5)
 except KeyboardInterrupt:
     print("Script interrupted, exiting...")
 finally:

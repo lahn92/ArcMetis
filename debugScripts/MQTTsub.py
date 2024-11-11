@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 
 # MQTT Broker address
 mqtt_broker = '192.168.1.64'  # Replace with your broker's IP
-mqtt_topic = 'vehicle/utc_time'
+mqtt_topic = 'platform/utc_time'
 
 # Define on_connect callback
 def on_connect(client, userdata, flags, rc):

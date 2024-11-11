@@ -1,0 +1,33 @@
+    probe/CH4
+    probe/CO2
+    probe/EC
+    probe/MIPEX
+    probe/O2
+    probe/P_diff
+    probe/P_inde
+    probe/P_ude
+    probe/Perc_bat
+    probe/RH
+    probe/SCD30_temp
+    probe/T_ude
+    probe/htu_temp
+    probe/leak
+    probe/tidGaaet
+
+topic
+
+    topic/P_ude
+    topic/Perc_bat
+    topic/status
+    topic/tidGaaet
+
+platform
+
+    platform/sonarDepth
+    platform/utc_time
+    platform/winchSetPoint
+
+vehicle
+
+    vehicle/battery_voltage
+    vehicle/mode
