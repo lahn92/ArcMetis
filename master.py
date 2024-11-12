@@ -9,7 +9,8 @@ venv_python = '/home/arcmetis/ArcMetis/.venv/bin/python3'
 scripts = [
     'UDPtoMQTT.py',
     'winchController.py',
-    'MQTTstatus.py'
+    'MQTTstatus.py',
+    'MQTTtoLOG.py',
 ]
 
 # Start each script in parallel
