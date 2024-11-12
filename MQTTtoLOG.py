@@ -38,6 +38,9 @@ def on_message(client, userdata, msg):
     topic = msg.topic
     payload = msg.payload.decode()
 
+    # Debug: print received topic and payload
+    print(f"Received message: Topic = {topic}, Payload = {payload}")
+
     # Start logging when "status/logging" is set to "1" and USB is present
     if topic == "status/logging":
         if payload == "1" and not logging_enabled and usb_present:
