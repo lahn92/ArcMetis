@@ -4,7 +4,9 @@ import time
 # MQTT setup
 BROKER_IP = "127.0.0.1"  # Adjust if needed
 STATUS_TOPIC = "status/alarms"
-ALERT_TOPICS = ["probe/leak", "status/noUSB"]
+ALERT_TOPICS = ["probe/leak", 
+                "status/noUSB",
+                ]
 TOPIC_ALERT_STATUS = {}  # Stores status numbers for each topic
 current_alerts = []
 alert_index = 0
