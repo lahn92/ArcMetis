@@ -1,3 +1,5 @@
+   
+probe (contains all data points send from the probe to MQTT)
     probe/CH4
     probe/CO2
     probe/EC
@@ -14,20 +16,18 @@
     probe/leak
     probe/tidGaaet
 
-topic
-
-    topic/P_ude
-    topic/Perc_bat
-    topic/status
-    topic/tidGaaet
-
-platform
-
+platform (contains all data points sent from the platform to MQTT)
     platform/sonarDepth
     platform/utc_time
     platform/winchSetPoint
+    platform/winchCurrentpoint
+
+status
+    status/alarms
+    status/collecting
+
+
 
 vehicle
-
     vehicle/battery_voltage
     vehicle/mode

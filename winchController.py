@@ -1,5 +1,3 @@
-#this script litens to the winch setpoint from the MQTT broker and handles any winchcontroles from there. 
-
 import paho.mqtt.client as mqtt
 from gpiozero import PWMOutputDevice, DigitalOutputDevice, DigitalInputDevice
 from gpiozero.pins.pigpio import PiGPIOFactory
@@ -26,6 +24,7 @@ DISTANCE_PER_PULSE = 0.2638  # Distance per encoder pulse in cm
 # MQTT Settings
 mqtt_broker = '127.0.0.1'
 mqtt_topic = 'platform/winchSetPoint'
+status_topic = 'platform/winchCurrentpoint'
 RECONNECT_ATTEMPTS = 5      # Max number of reconnect attempts
 
 # Define the pin factory using pigpio
@@ -59,7 +58,7 @@ def get_position_cm():
     """Calculates the current position in cm from pulses."""
     return position_pulses * DISTANCE_PER_PULSE
 
-def home_motor():
+def home_motor(client):
     """Moves the motor 'up' to the home position using the hall effect sensor."""
     print("Homing motor...")
     global current_direction
@@ -79,8 +78,9 @@ def home_motor():
     global position_pulses
     position_pulses = 0
     print("Motor homed to zero position.")
+    client.publish(status_topic, (get_position_cm()/100))
 
-def move_to_position(target_cm):
+def move_to_position(client, target_cm):
     """Moves the motor to a specified position in cm."""
     print(f"Moving to target position: {target_cm} cm")
     global current_direction
@@ -94,8 +94,10 @@ def move_to_position(target_cm):
     # Determine direction based on target position
     if target_cm > current_position:
         current_direction = 'down'  # Move down if target is greater than current
+        client.publish(status_topic, -2)
     else:
         current_direction = 'up'    # Move up if target is less than current
+        client.publish(status_topic, -1)
 
     print(f"Current Position: {current_position} cm, Direction: {current_direction}")
 
@@ -130,7 +132,9 @@ def move_to_position(target_cm):
 
     # Stop the motor after reaching the target or if end-stop is triggered
     pwm_motor.off()
-    print(f"Reached position: {get_position_cm()} cm at {position_pulses} pulses")
+    final_position = get_position_cm()
+    print(f"Reached position: {final_position} cm at {position_pulses} pulses")
+    client.publish(status_topic, (final_position/100))
 
 def on_mqtt_message(client, userdata, message):
     """Callback function to handle MQTT messages."""
@@ -139,9 +143,9 @@ def on_mqtt_message(client, userdata, message):
         print(f"Received target position: {target_position} cm from MQTT")
         
         if target_position == 0:
-            home_motor()  # Home the motor if the setpoint is 0
+            home_motor(client)  # Home the motor if the setpoint is 0
         else:
-            move_to_position(target_position)
+            move_to_position(client, target_position)
     except ValueError:
         print("Invalid MQTT message: expected numeric target position")
 
@@ -161,10 +165,9 @@ def on_mqtt_disconnect(client, userdata, rc):
     
     # If unable to reconnect after initial connection, home the motor
     print("Failed to reconnect after multiple attempts. Homing the motor.")
-    home_motor()
+    home_motor(client)
 
 def main():
-    home_motor()
     # Set up MQTT client
     client = mqtt.Client()
     client.on_message = on_mqtt_message
@@ -188,6 +191,7 @@ def main():
     client.loop_start()
 
     try:
+        home_motor(client)  # Initial homing at startup
         while True:
             time.sleep(1)  # Keep the program running to receive MQTT messages
     except KeyboardInterrupt:
