@@ -2,8 +2,9 @@ import paho.mqtt.client as mqtt
 import csv
 import os
 import time
+from datetime import datetime
 
-# Initialize variables for data
+# Initialize variables for data and logging status
 data = {
     "tidGaaet": None,
     "P_ude": None,
@@ -21,58 +22,53 @@ data = {
     "P_diff": None
 }
 
-# USB path where CSV will be saved
-usb_path = '/media/arcmetis/ARCMETIS/data_log.csv'
+logging_enabled = False
+csv_file_path = None
+
+# USB base path and specific path for data logging
+usb_base_path = '/media/arcmetis/ARCMETIS/'
+usb_present = os.path.exists(usb_base_path)
+
+# MQTT topic for USB status
+usb_status_topic = "status/noUSB"
 
 # Callback when a message is received
 def on_message(client, userdata, msg):
+    global logging_enabled, csv_file_path
     topic = msg.topic
     payload = msg.payload.decode()
 
-    # Check which topic has been updated and update the corresponding value
-    if topic == "probe/tidGaaet":
-        data["tidGaaet"] = payload
-    elif topic == "probe/P_ude":
-        data["P_ude"] = payload
-    elif topic == "probe/P_inde":
-        data["P_inde"] = payload
-    elif topic == "probe/RH":
-        data["RH"] = payload
-    elif topic == "probe/SCD30_temp":
-        data["SCD30_temp"] = payload
-    elif topic == "probe/htu_temp":
-        data["htu_temp"] = payload
-    elif topic == "probe/T_ude":
-        data["T_ude"] = payload
-    elif topic == "probe/CO2":
-        data["CO2"] = payload
-    elif topic == "probe/O2":
-        data["O2"] = payload
-    elif topic == "probe/CH4":
-        data["CH4"] = payload
-    elif topic == "probe/MIPEX":
-        data["MIPEX"] = payload
-    elif topic == "probe/EC":
-        data["EC"] = payload
-    elif topic == "probe/Perc_bat":
-        data["Perc_bat"] = payload
-    elif topic == "probe/P_diff":
-        data["P_diff"] = payload
+    # Start logging when "status/logging" is set to "1" and USB is present
+    if topic == "status/logging":
+        if payload == "1" and not logging_enabled and usb_present:
+            logging_enabled = True
+            # Create a new CSV file with UTC date and time in the name
+            current_time = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
+            csv_file_path = os.path.join(usb_base_path, f"data_log_{current_time}.csv")
+            print(f"Logging started. Data will be saved to {csv_file_path}")
+        elif payload == "0" and logging_enabled:
+            logging_enabled = False
+            print("Logging stopped.")
 
-    # If "topic/tidGaaet" is updated, save the data to CSV
-    if topic == "probe/tidGaaet":
-        save_to_csv(data)
-        reset_data()
+    # Update data dictionary when probe topics are received
+    elif logging_enabled and topic.startswith("probe/"):
+        key = topic.split('/')[-1]
+        if key in data:
+            data[key] = payload
+
+        # Save to CSV when "tidGaaet" topic is updated
+        if topic == "probe/tidGaaet":
+            save_to_csv(data)
+            reset_data()
 
 # Save data to CSV
 def save_to_csv(data):
-    # Ensure the USB drive exists and is writable
-    if not os.path.exists(usb_path):
-        print(f"USB drive not found at {usb_path}. Exiting.")
+    if csv_file_path is None:
+        print("CSV file path is not set.")
         return
 
     # Open the CSV file and append new row
-    with open(usb_path, mode='a', newline='') as file:
+    with open(csv_file_path, mode='a', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=data.keys())
 
         # Write headers if file is empty
@@ -83,7 +79,7 @@ def save_to_csv(data):
         writer.writerow(data)
         print(f"Data saved: {data}")
 
-# Reset the data dictionary to 'null'
+# Reset the data dictionary to 'None'
 def reset_data():
     global data
     for key in data:
@@ -97,6 +93,13 @@ client.on_message = on_message
 
 # Connect to the MQTT broker (assumes broker is on the same Raspberry Pi)
 client.connect("127.0.0.1", keepalive=60)
+
+# USB fault handler: check for USB presence and publish status if absent
+if not usb_present:
+    client.publish(usb_status_topic, "1")
+    print(f"USB drive not found at {usb_base_path}. 'status/noUSB' set to 1.")
+else:
+    print("USB drive is present.")
 
 # Subscribe to topics
 topics = [
@@ -113,7 +116,8 @@ topics = [
     "probe/MIPEX",
     "probe/EC",
     "probe/Perc_bat",
-    "probe/P_diff"
+    "probe/P_diff",
+    "status/logging"
 ]
 
 for topic in topics:

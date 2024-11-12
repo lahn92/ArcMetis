@@ -24,7 +24,8 @@ platform (contains all data points sent from the platform to MQTT)
 
 status
     status/alarms
-    status/collecting
+    status/logging
+    status/noUSB
 
 
 
