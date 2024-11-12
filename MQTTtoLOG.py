@@ -99,6 +99,7 @@ if not usb_present:
     client.publish(usb_status_topic, "1")
     print(f"USB drive not found at {usb_base_path}. 'status/noUSB' set to 1.")
 else:
+    client.publish(usb_status_topic, "0")
     print("USB drive is present.")
 
 # Subscribe to topics
