@@ -4,7 +4,7 @@ Start af python virtual inverioment
 
 Service comandoer
     sudo systemctl daemon-reload
-    sudo systemctl status "service name"
+    sudo systemctl status arcmetis.service
     sudo systemctl start "service name"
     sudo systemctl enable "service name"
     sudo systemctl disable "service name"
