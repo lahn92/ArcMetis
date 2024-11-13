@@ -11,6 +11,7 @@ scripts = [
     'winchController.py',
     'MQTTstatus.py',
     'MQTTtoLOG.py',
+    'sonarToMQTT.py',
 ]
 
 # Start each script in parallel
