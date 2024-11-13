@@ -5,7 +5,7 @@ import time
 import paho.mqtt.client as mqtt
 
 # Hardcoded settings
-DEVICE_PORT = '/dev/ttyUSB0'  # Change this to your actual device port
+DEVICE_PORT = '/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AB0JJR9I-if00-port0'
 BAUDRATE = 115200
 MQTT_BROKER = '127.0.0.1'  # MQTT broker address
 
