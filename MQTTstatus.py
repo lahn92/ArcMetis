@@ -5,7 +5,7 @@ import time
 BROKER_IP = "127.0.0.1"  # Adjust if needed
 STATUS_TOPIC = "status/alarms"
 ALERT_TOPICS = ["status/noUSB", 
-                "probe/leak",]
+                "probe/leak"]
 TOPIC_ALERT_STATUS = {}  # Stores status numbers for each topic
 current_alerts = []
 alert_index = 0
@@ -65,7 +65,7 @@ def main():
     client.on_message = on_message
 
     try:
-        client.connect(BROKER_IP, keepalive=60)
+        client.connect(BROKER_IP, keepalive=60)  # Adding keepalive interval to the connection
     except Exception as e:
         print(f"Initial connection failed: {e}")
         client.reconnect()
