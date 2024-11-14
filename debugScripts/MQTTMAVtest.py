@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 
 # Configuration
-mqtt_broker = 'arcmetis.local'  # Replace with your MQTT broker's IP
+mqtt_broker = '192.168.225.165'  # Replace with your MQTT broker's IP
 mqtt_topics = [
     "platform/mode",
     "platform/battery_voltage",
