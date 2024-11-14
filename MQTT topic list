@@ -21,14 +21,20 @@ platform (contains all data points sent from the platform to MQTT)
     platform/utc_time
     platform/winchSetPoint
     platform/winchCurrentpoint
+    platform/system_status
+    platform/mode
+    platform/battery_voltage
+    platform/gps_latitude
+    platform/gps_longitude
+    platform/gps_altitude
+    platform/gps_speed
+    platform/gps_yaw
+    platform/battery_current
+    platform/arming_status
+    platform/heading
+
 
 status
     status/alarms
     status/logging
     status/noUSB
-
-
-
-vehicle
-    vehicle/battery_voltage
-    vehicle/mode

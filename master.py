@@ -12,6 +12,7 @@ scripts = [
     'MQTTstatus.py',
     'MQTTtoLOG.py',
     'sonarToMQTT.py',
+    'MAVtoMQTT.py',
 ]
 
 # Start each script in parallel

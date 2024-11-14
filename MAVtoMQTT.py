@@ -92,14 +92,31 @@ def publish_arming_status(client):
         print("Arming status not available.")
 
 def publish_system_status(client):
-    # System status available in the HEARTBEAT message
-    heartbeat = master.recv_match(type='HEARTBEAT', blocking=True)
-    if heartbeat:
-        system_status = heartbeat.system_status
-        print(f"System status: {system_status}")
-        client.publish("platform/system_status", system_status)
+    # Receive SYS_STATUS message
+    sys_status = master.recv_match(type='SYS_STATUS', blocking=True)
+    
+    if sys_status:
+        status_code = sys_status.onboard_control_sensors_health
+        status_message = map_system_status(status_code)
+        print(f"System Status: {status_message}")
+        client.publish("platform/system_status", status_message)
     else:
-        print("System status not available.")
+        print("System status data not available.")
+
+# Map system status value to the corresponding message
+def map_system_status(status_code):
+    status_map = {
+        0: "Uninitialized",
+        1: "Standby",
+        2: "Active",
+        3: "Critical",
+        4: "Emergency",
+        5: "Fail-Safe",
+        6: "Shutdown"
+    }
+    # Return the mapped status or a default message if unknown status code
+    return status_map.get(status_code, "Unknown Status")
+
 
 def publish_gps_speed(client):
     # GPS speed available in the GPS_RAW_INT message
