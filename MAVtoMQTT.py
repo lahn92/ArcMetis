@@ -6,7 +6,7 @@ import os
 
 # Configuration
 baud_rate = 57600
-mqtt_broker = '192.168.1.64'  # Replace with your MQTT broker's IP
+mqtt_broker = '127.0.0.1'  # Replace with your MQTT broker's IP
 
 # Find the correct device by searching for available ttyACM* devices
 def find_mavlink_device():
