@@ -122,16 +122,15 @@ def publish_battery_current(client):
         print("Battery current not available.")
 
 def publish_heading(client):
-    # Heading provided by ArduPilot's calculation from dual GPS setup (e.g., moving baseline RTK)
-    # Typically available in the VFR_HUD or AHRS3 message.
-    ahrs = master.recv_match(type='AHRS3', blocking=True)
-    if ahrs:
-        heading = ahrs.yaw  # Yaw is usually provided in radians
-        heading_degrees = heading * (180.0 / 3.14159)  # Convert radians to degrees
-        print(f"Heading: {heading_degrees:.2f}°")
-        client.publish("platform/heading", heading_degrees)
+    # Heading may also be available in the VFR_HUD message
+    vfr_hud = master.recv_match(type='VFR_HUD', blocking=True)
+    if vfr_hud:
+        heading = vfr_hud.heading  # Heading directly in degrees
+        print(f"Heading: {heading}°")
+        client.publish("platform/heading", heading)
     else:
         print("Heading data not available.")
+
 
 
 # Dictionary of telemetry functions for easy addition
