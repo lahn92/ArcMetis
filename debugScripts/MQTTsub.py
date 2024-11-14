@@ -1,8 +1,8 @@
 import paho.mqtt.client as mqtt
 
 # MQTT Broker address
-mqtt_broker = '192.168.1.64'  # Replace with your broker's IP
-mqtt_topic = 'platform/utc_time'
+mqtt_broker = 'arcmetis.local'  # Replace with your broker's IP
+mqtt_topic = 'status/alarms'
 
 # Define on_connect callback
 def on_connect(client, userdata, flags, rc):

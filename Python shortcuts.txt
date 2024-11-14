@@ -9,7 +9,7 @@ Service comandoer
     sudo systemctl enable "service name"
     sudo systemctl disable "service name"
     sudo systemctl stop "service name"
-    sudo systemctl restart arcmetis.service
+    sudo systemctl restart grafana-kiosk.service
 Services der bruges:
     arcmetis.service
     grafana.service

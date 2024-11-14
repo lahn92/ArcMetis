@@ -4,12 +4,14 @@ import time
 # MQTT setup
 BROKER_IP = "127.0.0.1"  # Adjust if needed
 STATUS_TOPIC = "status/alarms"
-ALERT_TOPICS = ["probe/leak", 
-                "status/noUSB",
-                ]
+ALERT_TOPICS = ["status/noUSB", 
+                "probe/leak",]
 TOPIC_ALERT_STATUS = {}  # Stores status numbers for each topic
 current_alerts = []
 alert_index = 0
+
+MAX_RETRIES = 5  # Maximum number of retries
+RETRY_INTERVAL = 5  # Time (in seconds) between retries
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -22,14 +24,18 @@ def on_connect(client, userdata, flags, rc):
 
 def on_disconnect(client, userdata, rc):
     print("Disconnected from MQTT broker. Attempting to reconnect...")
-    while True:
+    retry_count = 0
+    while retry_count < MAX_RETRIES:
         try:
             client.reconnect()
             print("Reconnected to MQTT broker.")
             break
         except Exception as e:
-            print(f"Reconnection failed: {e}. Retrying in 5 seconds...")
-            time.sleep(5)
+            retry_count += 1
+            print(f"Reconnection attempt {retry_count} failed: {e}. Retrying in {RETRY_INTERVAL} seconds...")
+            time.sleep(RETRY_INTERVAL)
+    if retry_count == MAX_RETRIES:
+        print("Maximum retries reached. Could not reconnect to MQTT broker.")
 
 def on_message(client, userdata, msg):
     topic = msg.topic
@@ -59,7 +65,7 @@ def main():
     client.on_message = on_message
 
     try:
-        client.connect(BROKER_IP)
+        client.connect(BROKER_IP, keepalive=60)
     except Exception as e:
         print(f"Initial connection failed: {e}")
         client.reconnect()
