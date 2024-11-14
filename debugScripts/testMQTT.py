@@ -4,7 +4,7 @@ import time
 import threading
 
 # MQTT Broker address
-BROKER = "192.168.150.165"
+BROKER = "arcmetis.local"
 
 # MQTT Topics
 TOPICS = {

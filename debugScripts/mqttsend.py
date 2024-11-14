@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 
 # MQTT Settings
-mqtt_broker = '192.168.150.165'  # IP address of the MQTT broker
+mqtt_broker = 'arcmetis.local1'  # IP address of the MQTT broker
 topics = [
     'status/noUSB',
     'probe/leak',
