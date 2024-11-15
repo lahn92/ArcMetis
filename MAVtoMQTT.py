@@ -9,7 +9,7 @@ baud_rate = 57600
 mqtt_broker = '127.0.0.1'  # Replace with your MQTT broker's IP
 button_channel = 8  # RC8 corresponds to channel 8
 button_threshold = 1500  # Threshold for button press
-mqtt_topic = "status/logging"  # Topic to publish to
+mqtt_topic = "status/init_sampling"  # Topic to publish to
 
 # Find the correct device by searching for available ttyACM* devices
 def find_mavlink_device():

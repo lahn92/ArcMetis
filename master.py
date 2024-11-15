@@ -10,8 +10,8 @@ scripts = [
     'winchController.py',
     'MQTTtoLOG.py',
     'sonarToMQTT.py',
+    'MAVtoMQTT.py',
 ]
-#'MAVtoMQTT.py',
 
 # Start each script in parallel (except MQTTstatus.py)
 processes = []
