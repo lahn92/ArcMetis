@@ -8,13 +8,12 @@ venv_python = '/home/arcmetis/ArcMetis/.venv/bin/python3'
 # List of scripts to run
 scripts = [
     'UDPtoMQTT.py',
-    'winchController.py',
     'MQTTstatus.py',
     'MQTTtoLOG.py',
     'sonarToMQTT.py',
     'MAVtoMQTT.py',
 ]
-
+#    'winchController.py',
 # Start each script in parallel
 processes = []
 for script in scripts:
