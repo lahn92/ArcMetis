@@ -83,7 +83,7 @@ def home_motor(client):
 def move_to_position(client, target_cm):
     """Moves the motor to a specified position in cm."""
     print(f"Moving to target position: {target_cm} cm")
-    global current_direction
+    global current_direction, position_pulses
 
     if target_cm < 0:
         print("Target position cannot be negative.")
@@ -101,27 +101,38 @@ def move_to_position(client, target_cm):
 
     print(f"Current Position: {current_position} cm, Direction: {current_direction}")
 
-    # Start the motor based on the determined direction
+    # Set direction for motor movement
     if current_direction == 'down':
-        # Set direction for downward movement considering inversion
         direction_pin.on() if invert_direction else direction_pin.off()
-        pwm_motor.value = MOTOR_SPEED  # Use normal motor speed
+        pwm_motor.value = MOTOR_SPEED
         print("Motor moving down")
     elif current_direction == 'up':
         if hall_effect_sensor.is_active:
             print("End-stop reached. Motor will not run up.")
             return
-        # Set direction for upward movement considering inversion
         direction_pin.off() if invert_direction else direction_pin.on()
-        pwm_motor.value = MOTOR_SPEED  # Use normal motor speed
+        pwm_motor.value = MOTOR_SPEED
         print("Motor moving up")
 
-    # Continue until target position is reached
+    last_pulse_count = position_pulses
+    no_pulse_timeout = 1.0  # Timeout in seconds
+    timeout_start = time.time()
+
     while (current_direction == 'down' and current_position < target_cm) or \
           (current_direction == 'up' and current_position > target_cm):
-
-        current_position = get_position_cm()  # Update current position
+        current_position = get_position_cm()
         print(f"Current Position: {current_position} cm")
+
+        # Check for encoder activity
+        if position_pulses != last_pulse_count:
+            last_pulse_count = position_pulses
+            timeout_start = time.time()  # Reset timeout if pulses change
+
+        if time.time() - timeout_start > no_pulse_timeout:
+            print("Encoder is not registering changes. Stopping motor and rehoming.")
+            pwm_motor.off()
+            home_motor(client)
+            return
 
         # Check for end-stop if moving up
         if current_direction == 'up' and hall_effect_sensor.is_active:
@@ -134,7 +145,8 @@ def move_to_position(client, target_cm):
     pwm_motor.off()
     final_position = get_position_cm()
     print(f"Reached position: {final_position} cm at {position_pulses} pulses")
-    client.publish(status_topic, (final_position/100))
+    client.publish(status_topic, (final_position / 100))
+
 
 def on_mqtt_message(client, userdata, message):
     """Callback function to handle MQTT messages."""
