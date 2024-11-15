@@ -7,19 +7,20 @@ import os
 # Configuration
 baud_rate = 57600
 mqtt_broker = '127.0.0.1'  # Replace with your MQTT broker's IP
+button_channel = 8  # RC8 corresponds to channel 8
+button_threshold = 1500  # Threshold for button press
+mqtt_topic = "status/logging"  # Topic to publish to
 
 # Find the correct device by searching for available ttyACM* devices
 def find_mavlink_device():
     possible_devices = glob.glob('/dev/ttyACM*')
     for device in possible_devices:
         try:
-            # Try to create a MAVLink connection to test the device
             master = mavutil.mavlink_connection(device, baud=baud_rate)
-            # Wait briefly for a heartbeat to confirm it's a MAVLink device
             print(f"Checking {device} for heartbeat...")
-            master.wait_heartbeat(timeout=5)  # Timeout after 5 seconds if no heartbeat
+            master.wait_heartbeat(timeout=5)
             print(f"Connected to MAVLink device at {device}")
-            return master  # Return the valid MAVLink connection
+            return master
         except Exception as e:
             print(f"Device {device} is not a MAVLink device: {e}")
     print("No valid MAVLink device found.")
@@ -34,17 +35,17 @@ if not master:
 client = mqtt.Client()
 client.connect(mqtt_broker)
 
-# Function to set system time based on GPS
-def set_system_time():
-    system_time = master.recv_match(type='SYSTEM_TIME', blocking=True)
-    if system_time and system_time.time_unix_usec > 0:
-        utc_time = system_time.time_unix_usec / 1e6  # Convert microseconds to seconds
-        utc_time_struct = time.gmtime(utc_time)
-        formatted_time = time.strftime('%Y-%m-%d %H:%M:%S', utc_time_struct)
-        print(f"Setting system time to: {formatted_time}")
-        os.system(f"sudo date -s '{formatted_time}'")
-    else:
-        print("No valid GPS time available.")
+# Function to monitor button presses and publish MQTT messages
+def monitor_button_press():
+    global previous_state
+    rc_channels = master.recv_match(type='RC_CHANNELS', blocking=True)
+    if rc_channels:
+        button_value = getattr(rc_channels, f'chan{button_channel}_raw', 0)
+        current_state = 1 if button_value > button_threshold else 0
+        if current_state != previous_state:  # Only publish if the state changes
+            print(f"Button state changed to {current_state}. Publishing to {mqtt_topic}...")
+            client.publish(mqtt_topic, str(current_state))
+            previous_state = current_state
 
 # Telemetry publishing functions
 def publish_mode(client):
@@ -57,131 +58,72 @@ def publish_battery_voltage(client):
     if battery and battery.voltages:
         valid_voltages = [v for v in battery.voltages if v != 65535]
         if valid_voltages:
-            voltage = valid_voltages[0] / 1000.0  # Convert millivolts to volts
+            voltage = valid_voltages[0] / 1000.0
             print(f"Battery voltage: {voltage:.2f}V")
             client.publish("platform/battery_voltage", voltage)
-        else:
-            print("No valid battery voltage readings.")
-    else:
-        print("Battery status not available or invalid data.")
 
 def publish_gps_coordinates(client):
     gps = master.recv_match(type='GPS_RAW_INT', blocking=True)
     if gps:
-        latitude = gps.lat / 1e7  # Convert from integer format to degrees
+        latitude = gps.lat / 1e7
         longitude = gps.lon / 1e7
-        altitude = gps.alt / 1e3  # Convert from millimeters to meters
-        print(f"GPS coordinates: Lat={latitude}, Lon={longitude}, Alt={altitude}m")
+        altitude = gps.alt / 1e3
+        print(f"GPS: Lat={latitude}, Lon={longitude}, Alt={altitude}m")
         client.publish("platform/gps_latitude", latitude)
         client.publish("platform/gps_longitude", longitude)
         client.publish("platform/gps_altitude", altitude)
-    else:
-        print("GPS data not available.")
 
 # Additional telemetry publishing functions
-
 def publish_arming_status(client):
-    # The arming status is available in the HEARTBEAT message
     heartbeat = master.recv_match(type='HEARTBEAT', blocking=True)
     if heartbeat:
         armed = heartbeat.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED
         arming_status = "armed" if armed else "disarmed"
         print(f"Arming status: {arming_status}")
         client.publish("platform/arming_status", arming_status)
-    else:
-        print("Arming status not available.")
-
-def publish_system_status(client):
-    # Receive SYS_STATUS message
-    sys_status = master.recv_match(type='SYS_STATUS', blocking=True)
-    
-    if sys_status:
-        status_code = sys_status.onboard_control_sensors_health
-        status_message = map_system_status(status_code)
-        print(f"System Status: {status_message}")
-        client.publish("platform/system_status", status_message)
-    else:
-        print("System status data not available.")
-
-# Map system status value to the corresponding message
-def map_system_status(status_code):
-    status_map = {
-        0: "Uninitialized",
-        1: "Standby",
-        2: "Active",
-        3: "Critical",
-        4: "Emergency",
-        5: "Fail-Safe",
-        6: "Shutdown"
-    }
-    # Return the mapped status or a default message if unknown status code
-    return status_map.get(status_code, "Unknown Status")
-
 
 def publish_gps_speed(client):
-    # GPS speed available in the GPS_RAW_INT message
     gps = master.recv_match(type='GPS_RAW_INT', blocking=True)
     if gps:
-        gps_speed = gps.vel / 100.0  # Convert from cm/s to m/s
+        gps_speed = gps.vel / 100.0
         print(f"GPS speed: {gps_speed} m/s")
         client.publish("platform/gps_speed", gps_speed)
-    else:
-        print("GPS speed not available.")
-
-def publish_battery_current(client):
-    # Battery current available in the BATTERY_STATUS message
-    battery = master.recv_match(type='BATTERY_STATUS', blocking=True)
-    if battery:
-        current = battery.current_battery / 100.0  # Convert from centiamps to amps
-        print(f"Battery current: {current} A")
-        client.publish("platform/battery_current", current)
-    else:
-        print("Battery current not available.")
 
 def publish_heading(client):
-    # Heading may also be available in the VFR_HUD message
     vfr_hud = master.recv_match(type='VFR_HUD', blocking=True)
     if vfr_hud:
-        heading = vfr_hud.heading  # Heading directly in degrees
+        heading = vfr_hud.heading
         print(f"Heading: {heading}°")
         client.publish("platform/heading", heading)
-    else:
-        print("Heading data not available.")
 
-
-
-# Dictionary of telemetry functions for easy addition
+# Dictionary of telemetry functions
 telemetry_functions = {
     "mode": publish_mode,
     "battery_voltage": publish_battery_voltage,
     "gps_coordinates": publish_gps_coordinates,
     "arming_status": publish_arming_status,
-    "system_status": publish_system_status,
     "gps_speed": publish_gps_speed,
-    "battery_current": publish_battery_current,
-    "heading": publish_heading
-    # Add additional telemetry functions here
+    "heading": publish_heading,
 }
 
-
-# Main loop to periodically set system time and publish telemetry data
+# Main loop
 try:
+    previous_state = None  # Track the previous button state
     while True:
-        # Set system time from GPS
-        set_system_time()
+        # Monitor button presses
+        monitor_button_press()
 
-        # Publish all telemetry items
+        # Publish telemetry
         for name, func in telemetry_functions.items():
             print(f"Publishing {name}...")
             func(client)
 
-        time.sleep(5)  # Adjust the frequency of data collection as needed
+        time.sleep(0.5)  # Adjust the frequency of checks and telemetry publishing
 
 except KeyboardInterrupt:
     print("Exiting...")
 
 finally:
-    # Close the MAVLink connection and MQTT client
     if master:
         master.close()
     client.disconnect()
