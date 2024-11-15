@@ -115,7 +115,7 @@ def move_to_position(client, target_cm):
         print("Motor moving up")
 
     last_pulse_count = position_pulses
-    no_pulse_timeout = 1.0  # Timeout in seconds
+    no_pulse_timeout = 0.5  # Timeout in seconds
     timeout_start = time.time()
 
     while (current_direction == 'down' and current_position < target_cm) or \
