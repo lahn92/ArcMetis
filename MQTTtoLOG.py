@@ -1,8 +1,8 @@
-import paho.mqtt.client as mqtt
 import csv
 import os
 import time
 from datetime import datetime
+import paho.mqtt.client as mqtt
 
 # Initialize variables for data and logging status
 data = {
@@ -22,6 +22,8 @@ data = {
     "P_diff": None
 }
 
+latitude = None
+longitude = None
 logging_enabled = False
 csv_file_path = None
 
@@ -29,31 +31,38 @@ csv_file_path = None
 usb_base_path = '/media/arcmetis/ARCMETIS/'
 usb_present = os.path.exists(usb_base_path)
 
-# MQTT topic for USB status
+# MQTT topics for USB status and GPS coordinates
 usb_status_topic = "status/noUSB"
-
+gps_latitude_topic = "platform/gps_latitude"
+gps_longitude_topic = "platform/gps_longitude"
 
 # Callback when a message is received
 def on_message(client, userdata, msg):
-    global logging_enabled, csv_file_path
+    global logging_enabled, csv_file_path, latitude, longitude
     topic = msg.topic
     payload = msg.payload.decode()
 
     # Debug: print received topic and payload
     print(f"Received message: Topic = {topic}, Payload = {payload}")
 
-    # Start logging when "status/logging" is set to "1" or "1.0" and USB is present
-    if topic == "status/logging":
+    # Handle GPS coordinates
+    if topic == gps_latitude_topic:
+        latitude = payload
+    elif topic == gps_longitude_topic:
+        longitude = payload
+
+    # Start or stop logging based on "status/logging"
+    elif topic == "status/logging":
         if payload in ["1", "1.0"] and not logging_enabled and usb_present:
             logging_enabled = True
             # Create a new CSV file with UTC date and time in the name
             current_time = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
             csv_file_path = os.path.join(usb_base_path, f"data_log_{current_time}.csv")
+            write_info_block()
             print(f"Logging started. Data will be saved to {csv_file_path}")
         elif payload in ["0", "0.0"] and logging_enabled:
             logging_enabled = False
             print("Logging stopped.")
-
 
     # Update data dictionary when probe topics are received
     elif logging_enabled and topic.startswith("probe/"):
@@ -66,13 +75,31 @@ def on_message(client, userdata, msg):
             save_to_csv(data)
             reset_data()
 
+# Write the information block to the CSV file
+def write_info_block():
+    if csv_file_path is None:
+        print("CSV file path is not set.")
+        return
+
+    # Write the information block
+    with open(csv_file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        current_time = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        writer.writerow(["Info Block"])
+        writer.writerow(["Time", current_time])
+        writer.writerow(["Data", "Logging started"])
+        writer.writerow(["Latitude", latitude if latitude else "Unknown"])
+        writer.writerow(["Longitude", longitude if longitude else "Unknown"])
+        writer.writerow([])  # Add a blank line for separation
+        print("Information block written to CSV.")
+
 # Save data to CSV
 def save_to_csv(data):
     if csv_file_path is None:
         print("CSV file path is not set.")
         return
 
-    # Open the CSV file and append new row
+    # Append new row to the CSV file
     with open(csv_file_path, mode='a', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=data.keys())
 
@@ -123,7 +150,9 @@ topics = [
     "probe/EC",
     "probe/Perc_bat",
     "probe/P_diff",
-    "status/logging"
+    "status/logging",
+    "gps_latitude_topic",
+    "gps_longitude_topic"
 ]
 
 for topic in topics:

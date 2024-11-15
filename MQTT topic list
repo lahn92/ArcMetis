@@ -39,3 +39,4 @@ status
     status/logging
     status/init_sampling
     status/noUSB
+    status/mavError

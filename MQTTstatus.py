@@ -5,7 +5,8 @@ import time
 BROKER_IP = "127.0.0.1"  # Adjust if needed
 STATUS_TOPIC = "status/alarms"
 ALERT_TOPICS = ["status/noUSB", 
-                "probe/leak"]
+                "probe/leak",
+                "status/mavError",]
 TOPIC_ALERT_STATUS = {}  # Stores status numbers for each topic
 current_alerts = []
 alert_index = 0
