@@ -1,3 +1,8 @@
+#
+#Script to control the winch on ARC-Metis.
+#on startup the script homes the winch and then starts controling based on asetpoint recived over MQTT
+#
+
 import paho.mqtt.client as mqtt
 from gpiozero import PWMOutputDevice, DigitalOutputDevice, DigitalInputDevice
 from gpiozero.pins.pigpio import PiGPIOFactory

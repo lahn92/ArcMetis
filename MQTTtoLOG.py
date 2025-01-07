@@ -1,3 +1,6 @@
+#
+#Logs the data recived from MQTT to a file on a USB drive attached to raspberry pi (drive name must be ARCMETIS)
+#
 import csv
 import os
 import time

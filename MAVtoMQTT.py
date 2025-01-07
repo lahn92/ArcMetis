@@ -1,3 +1,7 @@
+#
+# Script the connects to the Autopilot and publishes data on MQTT
+#
+
 import glob
 from pymavlink import mavutil
 import paho.mqtt.client as mqtt

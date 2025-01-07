@@ -1,3 +1,6 @@
+#
+# This script handles any alarms from diffrent system and publishes to MQTT. 
+#
 import paho.mqtt.client as mqtt
 import time
 
