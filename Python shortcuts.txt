@@ -8,7 +8,7 @@ Service comandoer
     sudo systemctl start "service name"
     sudo systemctl enable "service name"
     sudo systemctl disable "service name"
-    sudo systemctl stop "service name"
+    sudo systemctl stop discord_bot "service name"
     sudo systemctl restart grafana-kiosk.service
 Services der bruges:
     arcmetis.service

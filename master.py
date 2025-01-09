@@ -4,8 +4,9 @@ import time
 # Path to the virtual environment's Python executable
 venv_python = '/home/arcmetis/ArcMetis/.venv/bin/python3'
 
-# List of scripts to run, excluding MQTTstatus.py for  'UDPtoMQTT.py',
+# List of scripts to run, excluding MQTTstatus.py for  ,
 scripts = [
+    'UDPtoMQTT.py',
     'winchController.py',
     'MQTTtoLOG.py',
     'sonarToMQTT.py',

@@ -68,7 +68,6 @@ def process_data(data, client, mqtt_broker):
             tidGaaet, P_ude, Perc_bat = values
             
             # Publish to MQTT
-            client.publish("probe/tidGaaet", tidGaaet)
             client.publish("probe/P_ude", P_ude)
             client.publish("probe/Perc_bat", Perc_bat)
             client.publish("probe/tidGaaet", tidGaaet)
